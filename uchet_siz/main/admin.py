@@ -1,6 +1,7 @@
 from django.contrib import admin
-from django.db.models.functions import Lower
 import csv
+
+from django.db.models.functions import Lower
 from django.http import HttpResponse
 
 from .models import *
@@ -14,6 +15,10 @@ class SIZInline(admin.TabularInline):
 class WarehouseAdmin(admin.ModelAdmin):
     inlines = [SIZInline]
 
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'boss')
+
 
 @admin.register(SIZ)
 class SIZAdmin(admin.ModelAdmin):
@@ -24,16 +29,6 @@ class SIZAdmin(admin.ModelAdmin):
         return [Lower('name')]
 
 
-@admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'boss')
-
-
-@admin.register(IssuableItem)
-class IssuableItemAdmin(admin.ModelAdmin):
-    list_display = ('siz', 'quantity', 'job_title')
-
-
 class IssuableItemInline(admin.TabularInline):
     model = SIZ.issuable_siz.through
 
@@ -41,6 +36,11 @@ class IssuableItemInline(admin.TabularInline):
 @admin.register(JobTitle)
 class JobTitleAdmin(admin.ModelAdmin):
     inlines = [IssuableItemInline]
+
+
+@admin.register(IssuableItem)
+class IssuableItemAdmin(admin.ModelAdmin):
+    list_display = ('siz', 'quantity', 'job_title')
 
 
 class IssuedItemInline(admin.TabularInline):

@@ -75,11 +75,13 @@ class SIZ(models.Model):
             ('Руки', 'Руки'),
             ('Ноги', 'Ноги'),
             ('Общий', 'Общий'),
-            ('Голова', 'Голова')
-        ]
+            ('Голова', 'Голова'),
+            ('Другое', 'Другое'),
+        ],
+        verbose_name='Тип СИЗ',
     )
-    lifespan = models.IntegerField(default=12, verbose_name='Срок эксплуатации (мес.)')
-    clothes_size = models.FloatField(default=0, verbose_name='Размер СИЗ')
+    lifespan = models.IntegerField(default=12, verbose_name='Срок эксплуатации (мес.)', null=True, blank=True)
+    clothes_size = models.FloatField(default=0, verbose_name='Размер СИЗ', null=True, blank=True)
     issued_siz = models.ManyToManyField(Worker, through='IssuedItem', verbose_name='Выделенный СИЗ')
     issuable_siz = models.ManyToManyField(JobTitle, through='IssuableItem', verbose_name='Выделяемый СИЗ')
 
