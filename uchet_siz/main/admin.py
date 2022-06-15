@@ -5,13 +5,19 @@ from django.http import HttpResponse
 
 from .models import *
 
+
+class SIZInline(admin.TabularInline):
+    model = SIZ
+
+
 @admin.register(Warehouse)
 class WarehouseAdmin(admin.ModelAdmin):
-    pass
+    inlines = [SIZInline]
+
 
 @admin.register(SIZ)
 class SIZAdmin(admin.ModelAdmin):
-    list_display = ('name', 'clothes_size', 'quantity')
+    list_display = ('name', 'clothes_size', 'quantity', 'lifespan')
     search_fields = ('name', 'clothes_type', 'clothes_size')
 
     def get_ordering(self, request):
@@ -22,19 +28,36 @@ class SIZAdmin(admin.ModelAdmin):
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'boss')
 
+
+@admin.register(IssuableItem)
+class IssuableItemAdmin(admin.ModelAdmin):
+    list_display = ('siz', 'quantity', 'job_title')
+
+
+class IssuableItemInline(admin.TabularInline):
+    model = SIZ.issuable_siz.through
+
+
 @admin.register(JobTitle)
 class JobTitleAdmin(admin.ModelAdmin):
-    pass
+    inlines = [IssuableItemInline]
 
-class SIZInline(admin.TabularInline):
-    model = SIZ.issued_siz.through  
+
+class IssuedItemInline(admin.TabularInline):
+    model = SIZ.issued_siz.through
+    fields = ('siz', 'issue_reason', 'issued', 'quantity', 'issued_date', 'expired_date')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Worker)
 class WorkerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'surname', 'patronymic', 'department', 'job_title')
+    list_display = ('fio', 'department', 'job_title')
     search_fields = ('name', 'surname', 'patronymic', 'department__name', 'job_title__name')
 
-    inlines = [SIZInline]
+    inlines = [IssuedItemInline]
+
 
 @admin.register(SIZOrder)
 class SIZOrderAdmin(admin.ModelAdmin):
