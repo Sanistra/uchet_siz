@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -58,6 +60,27 @@ class Worker(models.Model):
     def fio(self):
         return f'{self.surname} {str(self.name)[0]}. {str(self.patronymic)[0]}.'
 
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None
+    ):
+        if not self.pk:
+            super().save()
+            issuable_items_for_worker = IssuableItem.objects.filter(job_title=self.job_title)
+            [
+                IssuedItem(
+                    worker=self,
+                    siz=item.siz,
+                    quantity=item.quantity
+                ).save()
+                for item in issuable_items_for_worker
+            ]
+        else:
+            super().save(force_insert, force_update, using, update_fields)
+
     class Meta:
         verbose_name = 'Работник'
         verbose_name_plural = 'Работники'
@@ -114,8 +137,16 @@ class IssuableItem(models.Model):
 
 
 class IssuedItem(models.Model):
-    issued_date = models.DateTimeField(null=True, verbose_name='Дата выдачи СИЗ')
-    expired_date = models.DateTimeField(null=True, verbose_name='Дата истечения срока годности')
+    issued_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Дата выдачи СИЗ'
+    )
+    expired_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Дата истечения срока годности'
+    )
     issue_reason = models.CharField(
         max_length=1000,
         null=True,
@@ -141,6 +172,26 @@ class IssuedItem(models.Model):
     )
     quantity = models.IntegerField(default=0, verbose_name='Количество')
     siz = models.ForeignKey(SIZ, on_delete=models.CASCADE, verbose_name='СИЗ')
+
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None
+    ):
+        if self.issued == 'Выдано':
+            self.issued_date = datetime.datetime.now()
+            expiration_months = IssuableItem.objects\
+                .filter(job_title=self.worker.job_title)\
+                .first()\
+                .lifespan
+
+            self.expired_date = self.issued_date + datetime.timedelta(
+                days=30 * expiration_months
+            )
+        super().save()
+        pass
 
     def __str__(self):
         return f"Выделенный СИЗ: {self.siz}, работнику: {self.worker}"
