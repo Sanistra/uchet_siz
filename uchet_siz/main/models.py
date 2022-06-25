@@ -145,6 +145,9 @@ class IssuedItem(models.Model):
     def __str__(self):
         return f"Выделенный СИЗ: {self.siz}, работнику: {self.worker}"
 
+    def __repr__(self):
+        return self.__str__()
+
     class Meta:
         verbose_name = 'Выделенная вещь'
         verbose_name_plural = 'Выделенные вещи'

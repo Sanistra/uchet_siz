@@ -15,6 +15,7 @@ class SIZInline(admin.TabularInline):
 class WarehouseAdmin(admin.ModelAdmin):
     inlines = [SIZInline]
 
+
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'boss')
@@ -79,7 +80,7 @@ class IssuedItemAdmin(admin.ModelAdmin):
 
         writer.writerow(field_names)
         for obj in queryset:
-            row = writer.writerow([getattr(obj, field) for field in field_names])
+            writer.writerow([getattr(obj, field) for field in field_names])
 
         return response
 
