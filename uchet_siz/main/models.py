@@ -153,13 +153,18 @@ class IssuedItem(models.Model):
         default='Другое',
         verbose_name='Причина выдачи'
     )
+
+    ISSUED_STATUS_ORDERED = 'Заказано'
+    ISSUED_STATUS_ISSUED = 'Выдано'
+    ISSUED_STATUS_EXPIRED = 'Израсходовано'
+
     issued = models.CharField(
         max_length=200,
         null=True,
         choices=[
-            ('Заказано', 'Заказано'),
-            ('Выдано', 'Выдано'),
-            ('Израсходовано', 'Израсходовано')
+            (ISSUED_STATUS_ORDERED, ISSUED_STATUS_ORDERED),
+            (ISSUED_STATUS_ISSUED, ISSUED_STATUS_ISSUED),
+            (ISSUED_STATUS_EXPIRED, ISSUED_STATUS_EXPIRED)
         ],
         verbose_name='Статус выданной вещи'
     )
